@@ -34,7 +34,7 @@ public class Note {
         this.priority = priority;
     }
 
-    public Note(int id, String title, String description, int dayOfWeek, int priority) {   //основной конструктор, инициализирует ВСЕ поля
+    public Note(int id, String title, String description, int dayOfWeek, int priority) {   //основной конструктор, инициализирует ВСЕ поля исключительно
         this.id = id;
         this.title = title;
         this.description = description;

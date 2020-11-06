@@ -18,12 +18,15 @@ import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerViewNotes;
     private final ArrayList<Note> notes = new ArrayList<>();
     private NotesAdapter adapter;
+
+    private NotesDatabase database;
 
 
     @Override
@@ -35,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
         if (actionBar!=null)
              actionBar.hide();
 
+        database = NotesDatabase.getInstance(this);   //получаем базу данных
+        getData();
         recyclerViewNotes = findViewById(R.id.recyclerViewNotes);
 
         adapter = new NotesAdapter(notes); //создаем адаптер и передаем еме Заметки
@@ -68,19 +73,27 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void remove(int position) {   // удаление элемента массива в отдельном методе
-        int id = notes.get(position).getId();
+    private void remove(int position) {   // удаление данных из БД
+       // int id = notes.get(position).getId();
+        Note note = notes.get(position);     //получаем экземпляр записи
+        database.notesDao().deleteNote(note);  //удаляем запись из БД
+        getData();                              //считываем данные снова
         adapter.notifyDataSetChanged();         //применить на адапторе
 
     }
-
-
 
 
     public void onClickAdNote(View view) {
 
         Intent intent = new Intent(this, AddNoteActivity.class);
         startActivity(intent);
+
+    }
+
+    private void getData(){                     //метод чтение из БД
+        List<Note> notesFromDB = database.notesDao().getAllNotes();   //у БД через метод notesDao() возвращающий интерфейс NotesDao вызваем метод чтения всех данных интерфейса
+        notes.clear();
+        notes.addAll(notesFromDB);
 
     }
 }

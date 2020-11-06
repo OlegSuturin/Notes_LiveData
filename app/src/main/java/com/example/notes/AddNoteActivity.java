@@ -23,6 +23,8 @@ public class AddNoteActivity extends AppCompatActivity {
     private RadioGroup radioGroupPriority;
     private Button buttonSaveNote;
 
+    private NotesDatabase database;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +35,7 @@ public class AddNoteActivity extends AppCompatActivity {
         if (actionBar!=null)
             actionBar.hide();
 
+        database = NotesDatabase.getInstance(this);  //снова получаем доступ к тойже самой базе
 
         editTextTitle = findViewById(R.id.editTextTitle);
         editTextDescription = findViewById(R.id.editTextDescription);
@@ -53,11 +56,8 @@ public class AddNoteActivity extends AppCompatActivity {
 
         // MainActivity.notes.add(new Note(title, description, dayOfWeek, priority));
         if (isField(title, description)) {
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(NotesContract.NotesEntry.COLUMN_TITLE, title);
-            contentValues.put(NotesContract.NotesEntry.COLUMN_DESCRIPTION, description);
-            contentValues.put(NotesContract.NotesEntry.COLUMN_DAY_OF_WEAK, dayOfWeek+1);
-            contentValues.put(NotesContract.NotesEntry.COLUMN_PRIORITY, priority);
+             Note note = new Note(title, description, dayOfWeek, priority);  // создаем экземпляр записи
+             database.notesDao().insertNote(note);    // вставляем запись в БД
 
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);

@@ -3,6 +3,9 @@ package com.example.notes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,10 +26,11 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerViewNotes;
-    private final ArrayList<Note> notes = new ArrayList<>();
+    private ArrayList<Note> notes = new ArrayList<>();
     private NotesAdapter adapter;
 
-    private NotesDatabase database;
+//    private NotesDatabase database;     доступ к БД уже не нужен
+    private MainViewModel viewModel;   //
 
 
     @Override
@@ -38,11 +42,13 @@ public class MainActivity extends AppCompatActivity {
         if (actionBar!=null)
              actionBar.hide();
 
-        database = NotesDatabase.getInstance(this);   //получаем базу данных
-        getData();
+        viewModel = ViewModelProviders.of(this).get(MainViewModel.class);    //получаем viewModel
+  //      database = NotesDatabase.getInstance(this);   //получаем базу данных
+        getData();   //Нужно запусть ТОЛЬКО ОДИН РАЗ в onCreate
         recyclerViewNotes = findViewById(R.id.recyclerViewNotes);
 
-        adapter = new NotesAdapter(notes); //создаем адаптер и передаем еме Заметки
+         adapter = new NotesAdapter(notes); //создаем адаптер и передаем еме Заметки
+        //adapter = new NotesAdapter();
         recyclerViewNotes.setLayoutManager(new LinearLayoutManager(this));  // располагать элементы по вертикали последовательно, могут быть варианты
         recyclerViewNotes.setAdapter(adapter);
 
@@ -74,11 +80,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void remove(int position) {   // удаление данных из БД
-       // int id = notes.get(position).getId();
-        Note note = notes.get(position);     //получаем экземпляр записи
-        database.notesDao().deleteNote(note);  //удаляем запись из БД
-        getData();                              //считываем данные снова
-        adapter.notifyDataSetChanged();         //применить на адапторе
+       // Note note = notes.get(position);     //получаем экземпляр записи
+        Note note = adapter.getNotes().get(position);
+        viewModel.deleteNote(note);     //действуем через viewModel
+ //       database.notesDao().deleteNote(note);  //удаляем запись из БД
+      // getData();                              //считываем данные снова      //ТЕПЕРЬ ЭТИ МЕТОДЫ НЕ НУЖНЫ - notes и RecicleView обновляются автоматически после изм. в БД !!! т.к. LIVEDATA
+        //   adapter.notifyDataSetChanged();         //применить на адапторе
 
     }
 
@@ -90,10 +97,21 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void getData(){                     //метод чтение из БД
-        List<Note> notesFromDB = database.notesDao().getAllNotes();   //у БД через метод notesDao() возвращающий интерфейс NotesDao вызваем метод чтения всех данных интерфейса
-        notes.clear();
-        notes.addAll(notesFromDB);
+    private void getData() {                     //метод чтение из БД  - запускаем только один раз в onCreate mainActivity
+        // List<Note> notesFromDB = database.notesDao().getAllNotes();   //у БД через метод notesDao() возвращающий интерфейс NotesDao вызваем метод чтения всех данных интерфейса
+                                                                    //действуем через viewModel
+        LiveData<List<Note>> notesFromDB = viewModel.getNotes();   //   notesFromDB - теперь это объект observerble (просматриваемый) - контроль изменений со стороны БД
+        notesFromDB.observe(this, new Observer<List<Note>>() {          //для использования изменений
+            @Override
+            public void onChanged(List<Note> notesFromLiveData) {              //в параметрах Лист записей, которые изменились
+               // notes.clear();                        ПОСЛЕ МОДЕРНИЗАЦИИ АДАПТЕРА исключаем !!!
+              //  notes.addAll(notesFromLiveData);
+              //  adapter.notifyDataSetChanged();
+                adapter.setNotes(notesFromLiveData);   //заменили на одну строку ЗДЕСЬ ТЕПЕРЬ ПЕРЕДАЮТСЯ ВСЕ ДАННЫЕ В АДАПТЕР
+            }
+        });
 
     }
+
+
 }

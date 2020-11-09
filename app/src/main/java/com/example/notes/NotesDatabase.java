@@ -18,9 +18,9 @@ public abstract class NotesDatabase extends RoomDatabase {
     public static NotesDatabase getInstance(Context context){     //использование паттерна SINGLETON для проверки что БД создается в одном экз.
         synchronized (LOCK) {         //замок на время создания БД
             if (database == null) {
-                database = Room.databaseBuilder(context, NotesDatabase.class, DB_NAME)
-                        .allowMainThreadQueries()       //возможность работы с БД в главном потоке - ТОЛЬКО ДЛЯ ТЕСТИРОВАНИЯ БД!!!
-                        .build();
+                database = Room.databaseBuilder(context, NotesDatabase.class, DB_NAME).build();
+                        //.allowMainThreadQueries()       //возможность работы с БД в главном потоке - ТОЛЬКО ДЛЯ ТЕСТИРОВАНИЯ БД!!!
+                       // .build();
             }
         } //end of synchronized
         return database;   //всегда возвращается один и тот же объект

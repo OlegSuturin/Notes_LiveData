@@ -2,6 +2,7 @@ package com.example.notes;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
 
 import android.content.ContentValues;
 import android.content.Intent;
@@ -23,7 +24,9 @@ public class AddNoteActivity extends AppCompatActivity {
     private RadioGroup radioGroupPriority;
     private Button buttonSaveNote;
 
-    private NotesDatabase database;
+   // private NotesDatabase database;
+
+    private MainViewModel viewModel;
 
 
     @Override
@@ -35,7 +38,9 @@ public class AddNoteActivity extends AppCompatActivity {
         if (actionBar!=null)
             actionBar.hide();
 
-        database = NotesDatabase.getInstance(this);  //снова получаем доступ к тойже самой базе
+        //database = NotesDatabase.getInstance(this);  //снова получаем доступ к тойже самой базе
+
+        viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
 
         editTextTitle = findViewById(R.id.editTextTitle);
         editTextDescription = findViewById(R.id.editTextDescription);
@@ -57,7 +62,8 @@ public class AddNoteActivity extends AppCompatActivity {
         // MainActivity.notes.add(new Note(title, description, dayOfWeek, priority));
         if (isField(title, description)) {
              Note note = new Note(title, description, dayOfWeek, priority);  // создаем экземпляр записи
-             database.notesDao().insertNote(note);    // вставляем запись в БД
+            // database.notesDao().insertNote(note);    // вставляем запись в БД
+               viewModel.isertNote(note);
 
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);

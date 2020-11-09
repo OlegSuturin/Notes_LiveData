@@ -9,12 +9,22 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHolder> {
 
-    ArrayList<Note> notes;
+    List<Note> notes;  // МОДЕРНИЗАЦИЯ адаптера  ИЗМЕНИЛИ на List
     private OnNoteClickListener onNoteClickListener; //создали объект нашего слушателя 2)  ТЕМА: РЕАКЦИЯ НА НАЖАТИЯ в RecycleView
 
+        //МОДЕРНИЗАЦИЯ адаптера с целью чтобы не загружать целиком все заметки каждый раз прю любом в записях БД в БД
+    public void setNotes(List<Note> notes) {       //ДОБАВИЛИ СЕТТЕР НА ArrayList
+        this.notes = notes;
+        notifyDataSetChanged();
+    }
+            //МОДЕРНИЗАЦИЯ адаптера - добавили getter на актуальный список (изменяющийся)
+    public List<Note> getNotes() {
+        return notes;
+    }
 
     public interface OnNoteClickListener {     //интерфес для реализации реакции на нажатия 1)  ТЕМА: РЕАКЦИЯ НА НАЖАТИЯ в RecycleView
         void onNoteClick(int position);     //реакция на простое нажатие
@@ -25,9 +35,9 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         this.onNoteClickListener = onNoteClickListener;     //добавили сеттер на объект листенера 3)  ТЕМА: РЕАКЦИЯ НА НАЖАТИЯ в RecycleView
     }
 
-    public NotesAdapter(ArrayList<Note> notes) {
+    public NotesAdapter(ArrayList<Note> notes) {        // конструктор адаптера
         this.notes = notes;  //инициализирум массив объектами Заметка
-    }
+   }
 
     @NonNull
     @Override
